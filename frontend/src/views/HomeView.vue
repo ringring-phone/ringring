@@ -19,8 +19,6 @@ const fetchStatus = async () => {
     registeredWithSIP.value = data.value.registeredWithSIP ?? null
     callActive.value = data.value.callActive ?? null
   }
-
-  console.log(data.value)
 }
 
 // Start periodic fetch on mount
