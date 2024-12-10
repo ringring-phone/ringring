@@ -1,3 +1,14 @@
+from multiprocessing import resource_tracker
+
+def patched_register(name, rtype):
+    if rtype == 'shared_memory':
+        print(f"Register ignored for {name} ({rtype})")
+        return
+    original_register(name, rtype)
+
+original_register = resource_tracker.register
+resource_tracker.register = patched_register
+
 from flask import Blueprint, jsonify
 from multiprocessing.shared_memory import SharedMemory
 import struct
@@ -13,6 +24,8 @@ def read_shared_memory():
         # Read the two booleans (assuming they are stored as two bytes)
         data = bytes(shm.buf[:3])  # Copy data from the buffer
         registered_with_sip, call_active, ringing = struct.unpack("???", data)
+        shm.close()
+
         return {"registeredWithSIP": registered_with_sip, "callActive": call_active, "ringing": ringing}
     except FileNotFoundError:
         return {"error": "Shared memory not found. Is the application running?"}
