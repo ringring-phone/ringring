@@ -2,8 +2,7 @@ from multiprocessing.shared_memory import SharedMemory
 import struct
 import time
 
-def write_shared_memory(registered_with_sip, call_active):
-    """Write two booleans to shared memory."""
+def write_shared_memory(registered_with_sip, call_active, ringing):
     try:
         # Attempt to connect to an existing shared memory block first
         try:
@@ -11,14 +10,14 @@ def write_shared_memory(registered_with_sip, call_active):
             print("Connected to existing shared memory block.")
         except FileNotFoundError:
             # If not found, create a new shared memory block
-            shm = SharedMemory(name="ringring", create=True, size=2)
+            shm = SharedMemory(name="ringring", create=True, size=3)
             print("Created new shared memory block.")
 
         # Pack the booleans into two bytes
-        data = struct.pack("??", registered_with_sip, call_active)
-        shm.buf[:2] = data  # Write to shared memory
+        data = struct.pack("???", registered_with_sip, call_active, ringing)
+        shm.buf[:3] = data  # Write to shared memory
 
-        print(f"Written to shared memory: registeredWithSIP={registered_with_sip}, callActive={call_active}")
+        print(f"Written to shared memory: registeredWithSIP={registered_with_sip}, callActive={call_active}, ringing={ringing}")
 
         while True:
             time.sleep(5)
@@ -35,4 +34,5 @@ if __name__ == "__main__":
     # Example usage
     registered_with_sip = True
     call_active = False
-    write_shared_memory(registered_with_sip, call_active)
+    ringing = False
+    write_shared_memory(registered_with_sip, call_active, ringing)
