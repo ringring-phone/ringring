@@ -5,7 +5,7 @@ export default {
     extend: {
       // Animation class
       animation: {
-        fade: 'fadeOut 3s ease-in-out 1s',
+        fade: 'fadeOut 1s ease-in-out 1s',
       },
 
       // Keyframes for the fade animation

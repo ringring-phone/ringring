@@ -1,34 +1,20 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import useApiFetch from '@/composables/useApiFetch'
+import useMessage from '@/composables/useMessage'
+
+const { showMessage } = useMessage()
 
 // Reactive variables for form fields
 const phoneNumber = ref('')
 const password = ref('')
 const sipIP = ref('')
 const saving = ref(false)
-const statusMessage = ref('')
-const isError = ref(false)
-const showMessage = ref(false)
-
-// Function to set the status message
-const setStatusMessage = (message: string, error = false) => {
-  statusMessage.value = message
-  isError.value = error
-
-  // Show the message and fade it out after 5 seconds
-  showMessage.value = true
-  setTimeout(() => {
-    showMessage.value = false
-    statusMessage.value = ''
-    isError.value = false
-  }, 3000)
-}
 
 // Fetch configuration and populate the form fields
 const { data: config, error: loadingError } = await useApiFetch('/api/config').get().json()
 if (loadingError.value) {
-  setStatusMessage('Error loading config', true)
+  showMessage('Error loading config', true)
 }
 
 // Watch for `config` changes and populate form fields
@@ -64,13 +50,13 @@ const saveConfig = async () => {
   saving.value = false
 
   if (saveError.value) {
-    setStatusMessage(saveError.value.message || 'An unexpected error occurred.', true)
+    showMessage(saveError.value.message || 'An unexpected error occurred.', true)
   } else if (response.value) {
     // Display success or error message based on response
     if (response.value.error) {
-      setStatusMessage(response.value.error, true)
+      showMessage(response.value.error, true)
     } else if (response.value.message) {
-      setStatusMessage(response.value.message)
+      showMessage(response.value.message)
     }
   }
 }
@@ -79,16 +65,6 @@ const saveConfig = async () => {
 <template>
   <div class="p-4">
     <div class="font-bold text-lg text-center">Settings</div>
-    <div
-      v-if="showMessage"
-      :class="[
-        'transition-opacity duration-5000 ease-in-out fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg max-w-md',
-        isError ? 'bg-red-300 text-black' : 'bg-green-300 text-black',
-        'animate-fade',
-      ]"
-    >
-      {{ statusMessage }}
-    </div>
     <form
       @submit.prevent="saveConfig"
       class="pt-4 grid grid-cols-2 mx-auto gap-3 items-center text-center"
@@ -122,7 +98,7 @@ const saveConfig = async () => {
 
       <button
         type="submit"
-        class="text-white rounded px-4 py-2 col-span-2 bg-purple-500 disabled:bg-purple-300"
+        class="text-white rounded px-4 py-2 mt-2 col-span-2 bg-purple-500 disabled:bg-purple-300"
         :disabled="!valid || saving"
       >
         <span v-if="saving" class="spinner"></span>
