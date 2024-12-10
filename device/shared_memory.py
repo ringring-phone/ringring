@@ -1,53 +1,69 @@
 from multiprocessing.shared_memory import SharedMemory
 import struct
 import time
-from global_state import GlobalState
+import sys
+from global_state import GlobalState, REGISTERED_WITH_SIP, CALL_ACTIVE, RINGING
 
-def global_state_changed(key, old_value, new_value):
-    print(f"GlobalState changed: {key} from {old_value} to {new_value}")
-    try:
-        # Attach to the shared memory block
-        shm = SharedMemory(name="ringring", create=True, size=3)
-        globals = GlobalState()
+SHARED_MEMORY_SIZE = 3
+SHARED_MEMORY_NAME = "ringring"
+SHARED_MEMORY_STRUCT = "???"
 
-        # Prepare data to write to shared memory
-        registered_with_sip = globals.get("registered_with_sip") or False
-        call_active = globals.get("call_active") or False
-        ringing = globals.get("ringing") or False
+def build_shared_memory():
+    globals = GlobalState()
 
-        # Pack the data into shared memory
-        data = struct.pack("???", registered_with_sip, call_active, ringing)
-        shm.buf[:3] = data
-        print(f"Shared memory updated: {registered_with_sip}, {call_active}, {ringing}")
-    except FileNotFoundError:
-        print("Shared memory block not found. Could not update shared memory.")
+    registered_with_sip = globals.get(REGISTERED_WITH_SIP) or False
+    call_active = globals.get(CALL_ACTIVE) or False
+    ringing = globals.get(RINGING) or False
 
+    # Pack the data into shared memory
+    return struct.pack(SHARED_MEMORY_STRUCT, registered_with_sip, call_active, ringing)
 
 def shared_memory():
     shm = None
     globals = GlobalState()
-    globals.add_listener(global_state_changed)
 
     # Store previous to watch for changes
     previous = None
 
-    while True:
-        if shm is None:
-            try:
-                shm = SharedMemory(name="ringring", create=False)
-            except FileNotFoundError:
-                # Do nothing
-                pass
+    try:
+        while True:
+            if shm is None:
+                # First time through, write out the global state
+                try:
+                    shm = SharedMemory(name=SHARED_MEMORY_NAME, create=True, size=SHARED_MEMORY_SIZE)
+                    previous = build_shared_memory()
+                    shm.buf[:SHARED_MEMORY_SIZE] = previous
+                except FileNotFoundError:
+                    # Do nothing
+                    pass
 
+            if shm is not None:
+                current_globals = build_shared_memory()
+                current_shared = bytes(shm.buf[:SHARED_MEMORY_SIZE])
+
+                if current_globals != previous:
+                    previous = build_shared_memory()
+                    shm.buf[:SHARED_MEMORY_SIZE] = previous
+                    print(f"Shared memory updated: {globals.get(REGISTERED_WITH_SIP)}, {globals.get(CALL_ACTIVE)}, {globals.get(RINGING)}")
+                elif current_shared != previous:
+                    current = struct.unpack(SHARED_MEMORY_STRUCT, current_shared)
+
+                    globals.set(REGISTERED_WITH_SIP, current[0])
+                    globals.set(CALL_ACTIVE, current[1])
+                    globals.set(RINGING, current[2])
+
+                    previous = current_shared
+                    print(f"Globals updated: {globals.get(REGISTERED_WITH_SIP)}, {globals.get(CALL_ACTIVE)}, {globals.get(RINGING)}")
+
+            time.sleep(1)
+    finally:
         if shm is not None:
-            data = bytes(shm.buf[:3])  # Copy data from the buffer
-            current = struct.unpack("???", data)
+            shm.close()
+            shm.unlink()
 
-            if current != previous:
-                previous = current
-
-                globals.set("registered_with_sip", current[0], suppress=[global_state_changed])
-                globals.set("call_active", current[1], suppress=[global_state_changed])
-                globals.set("ringing", current[2], suppress=[global_state_changed])
-
-        time.sleep(1)
+if __name__ == '__main__':
+    try:
+        shared_memory()
+    except KeyboardInterrupt:
+        print('Exiting...')
+        sys.exit(0)
