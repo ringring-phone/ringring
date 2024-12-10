@@ -19,7 +19,6 @@ resource_tracker.register = patched_register
 from multiprocessing.shared_memory import SharedMemory
 import struct
 
-
 def write_shared_memory(registered_with_sip, call_active, ringing):
     # Attempt to connect to an existing shared memory block first
     shm = SharedMemory(name="ringring", create=False)
