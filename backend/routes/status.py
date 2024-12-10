@@ -11,9 +11,9 @@ def read_shared_memory():
         # Connect to the shared memory block
         shm = SharedMemory(name="ringring", create=False)
         # Read the two booleans (assuming they are stored as two bytes)
-        data = bytes(shm.buf[:2])  # Copy data from the buffer
-        registered_with_sip, call_active = struct.unpack("??", data)
-        return {"registeredWithSIP": registered_with_sip, "callActive": call_active}
+        data = bytes(shm.buf[:3])  # Copy data from the buffer
+        registered_with_sip, call_active, ringing = struct.unpack("???", data)
+        return {"registeredWithSIP": registered_with_sip, "callActive": call_active, "ringing": ringing}
     except FileNotFoundError:
         return {"error": "Shared memory not found. Is the application running?"}
     except Exception as e:
