@@ -4,7 +4,7 @@ from ringer import ringer
 from dialer import dialer
 from hook import hook
 from shared_memory import shared_memory
-from app import app
+from sip import sip
 
 if __name__ == '__main__':
     # Create and start threads
@@ -13,7 +13,7 @@ if __name__ == '__main__':
         threading.Thread(target=dialer, daemon=True),
         threading.Thread(target=hook, daemon=True),
         threading.Thread(target=shared_memory, daemon=True),
-        threading.Thread(target=app, daemon=True)
+        threading.Thread(target=sip, daemon=True)
     ]
 
     for thread in threads:

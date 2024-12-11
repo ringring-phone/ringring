@@ -19,11 +19,8 @@ class GlobalState(metaclass=SingletonMeta):
 
     def get(self, key):
         return self.state.get(key, None)
-    
-# Make constants importable
-__all__ = ["REGISTERED_WITH_SIP", "CALL_ACTIVE", "RINGING"]
 
-# Export constants
-REGISTERED_WITH_SIP = "registered_with_sip"
-CALL_ACTIVE = "call_active"
-RINGING = "ringing"
+class State:
+    REGISTERED_WITH_SIP = "registered_with_sip"
+    CALL_ACTIVE = "call_active"
+    RINGING = "ringing"
