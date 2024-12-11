@@ -1,3 +1,5 @@
+import queue
+
 class SingletonMeta(type):
     _instances = {}
 
@@ -11,6 +13,7 @@ class SingletonMeta(type):
 class GlobalState(metaclass=SingletonMeta):
     def __init__(self):
         self.state = {}
+        self.queue = queue.Queue()
 
     def set(self, key, value):
         old_value = self.state.get(key)
@@ -19,6 +22,15 @@ class GlobalState(metaclass=SingletonMeta):
 
     def get(self, key):
         return self.state.get(key, None)
+    
+    def addCommand(self, command):
+        self.queue.put(command)
+
+    def getCommand(self):
+        try:
+            return self.queue.get(block=False)
+        except queue.Empty:
+            return None
 
 class State:
     REGISTERED_WITH_SIP = "registered_with_sip"
