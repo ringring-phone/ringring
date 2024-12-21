@@ -24,6 +24,7 @@ class GlobalState(metaclass=SingletonMeta):
         return self.state.get(key, None)
     
     def addCommand(self, command):
+        print(f"GlobalState.addCommand {command}")
         self.queue.put(command)
 
     def getCommand(self):
