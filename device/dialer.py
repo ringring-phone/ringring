@@ -49,9 +49,9 @@ def dialer():
 
                 if (recorded_value < 10):
                     sequence += str(recorded_value)
-                    logging.debug('Recorded %d', recorded_value)
+                    logging.debug(f'Recorded {recorded_value}')
                 else:
-                    logging.debug('Ignored %d', recorded_value)
+                    logging.debug(f'Ignored {recorded_value}')
 
                 last_recorded_time = time.time()
 
