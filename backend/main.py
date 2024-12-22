@@ -5,6 +5,7 @@ from logging.handlers import RotatingFileHandler
 from routes.config import config_bp
 from routes.status import status_bp
 from routes.ringer import ringer_bp
+from routes.busy import busy_bp
 
 def create_app():
   app = Flask(__name__)
@@ -13,6 +14,7 @@ def create_app():
   app.register_blueprint(config_bp, url_prefix='/api')
   app.register_blueprint(status_bp, url_prefix='/api')
   app.register_blueprint(ringer_bp, url_prefix='/api')
+  app.register_blueprint(busy_bp, url_prefix='/api')
 
   # Create a rotating file handler
   log_handler = RotatingFileHandler('../flask.log', maxBytes=100000, backupCount=3)

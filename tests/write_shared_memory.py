@@ -19,21 +19,23 @@ resource_tracker.register = patched_register
 from multiprocessing.shared_memory import SharedMemory
 import struct
 
-def write_shared_memory(registered_with_sip, call_active, ringing):
+def write_shared_memory(registered_with_sip, on_the_hook, call_active, ringing, busy):
     # Attempt to connect to an existing shared memory block first
     shm = SharedMemory(name="ringring", create=False)
     print("Connected to existing shared memory block.")
 
     # Pack the booleans into two bytes
-    data = struct.pack("???", registered_with_sip, call_active, ringing)
-    shm.buf[:3] = data  # Write to shared memory
+    data = struct.pack("?????", registered_with_sip, on_the_hook, call_active, ringing, busy)
+    shm.buf[:5] = data  # Write to shared memory
     shm.close()
 
-    print(f"Written to shared memory: registeredWithSIP={registered_with_sip}, callActive={call_active}, ringing={ringing}")
+    print(f"Written to shared memory: registeredWithSIP={registered_with_sip}, onTheHook={on_the_hook}, callActive={call_active}, ringing={ringing}, busy={busy}")
 
 if __name__ == "__main__":
     # Example usage
     registered_with_sip = True
+    on_the_hook = True
     call_active = False
-    ringing = False
-    write_shared_memory(registered_with_sip, call_active, ringing)
+    ringing = True
+    busy = False
+    write_shared_memory(registered_with_sip, on_the_hook, call_active, ringing, busy)

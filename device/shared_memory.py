@@ -2,11 +2,11 @@ from multiprocessing.shared_memory import SharedMemory
 import struct
 import time
 import sys
+import logging
 from global_state import GlobalState, State
 
-SHARED_MEMORY_SIZE = 3
+SHARED_MEMORY_SIZE = 5
 SHARED_MEMORY_NAME = "ringring"
-SHARED_MEMORY_STRUCT = "???"
 
 def build_shared_memory():
     globals = GlobalState()
@@ -14,9 +14,11 @@ def build_shared_memory():
     registered_with_sip = globals.get(State.REGISTERED_WITH_SIP) or False
     call_active = globals.get(State.CALL_ACTIVE) or False
     ringing = globals.get(State.RINGING) or False
+    on_the_hook = globals.get(State.ON_THE_HOOK) or False
+    busy = globals.get(State.BUSY) or False
 
     # Pack the data into shared memory
-    return struct.pack(SHARED_MEMORY_STRUCT, registered_with_sip, call_active, ringing)
+    return struct.pack("?" * SHARED_MEMORY_SIZE, registered_with_sip, on_the_hook, call_active, ringing, busy)
 
 def shared_memory():
     shm = None
@@ -44,16 +46,18 @@ def shared_memory():
                 if current_globals != previous:
                     previous = build_shared_memory()
                     shm.buf[:SHARED_MEMORY_SIZE] = previous
-                    print(f"Shared memory updated: {globals.get(State.REGISTERED_WITH_SIP)}, {globals.get(State.CALL_ACTIVE)}, {globals.get(RINGING)}")
+                    logging.debug(f"Shared memory updated: {globals.get(State.REGISTERED_WITH_SIP)}, {globals.get(State.ON_THE_HOOK)}, {globals.get(State.CALL_ACTIVE)}, {globals.get(State.RINGING)}, {globals.get(State.BUSY)}")
                 elif current_shared != previous:
-                    current = struct.unpack(SHARED_MEMORY_STRUCT, current_shared)
+                    current = struct.unpack("?" * SHARED_MEMORY_SIZE, current_shared)
 
                     globals.set(State.REGISTERED_WITH_SIP, current[0])
-                    globals.set(State.CALL_ACTIVE, current[1])
-                    globals.set(State.RINGING, current[2])
+                    globals.set(State.ON_THE_HOOK, current[1])
+                    globals.set(State.CALL_ACTIVE, current[2])
+                    globals.set(State.RINGING, current[3])
+                    globals.set(State.BUSY, current[4])
 
                     previous = current_shared
-                    print(f"Globals updated: {globals.get(State.REGISTERED_WITH_SIP)}, {globals.get(State.CALL_ACTIVE)}, {globals.get(State.RINGING)}")
+                    logging.debug(f"Globals updated: {globals.get(State.REGISTERED_WITH_SIP)}, {globals.get(State.ON_THE_HOOK)}, {globals.get(State.CALL_ACTIVE)}, {globals.get(State.RINGING)}, {globals.get(State.BUSY)}")
 
             time.sleep(1)
     finally:
