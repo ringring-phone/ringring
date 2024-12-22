@@ -1,4 +1,10 @@
 import queue
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(levelname)s:%(filename)s:%(message)s'
+)
 
 class SingletonMeta(type):
     _instances = {}
@@ -24,7 +30,7 @@ class GlobalState(metaclass=SingletonMeta):
         return self.state.get(key, None)
     
     def addCommand(self, command):
-        print(f"GlobalState.addCommand {command}")
+        logging.debug("addCommand %s", command)
         self.queue.put(command)
 
     def getCommand(self):
@@ -37,3 +43,4 @@ class State:
     REGISTERED_WITH_SIP = "registered_with_sip"
     CALL_ACTIVE = "call_active"
     RINGING = "ringing"
+    ON_THE_HOOK = "on_the_hook"

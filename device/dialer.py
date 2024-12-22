@@ -4,8 +4,6 @@ import sys
 import logging
 from global_state import GlobalState
 
-logging.basicConfig(level=logging.DEBUG)
-
 # Pin configuration
 CLICKPIN = 35
 STOPPIN = 37
