@@ -57,3 +57,27 @@ def set_busy_state(active):
 def get_busy_state():
     """Get the current ringer state from shared memory."""
     return read_shared_memory()["busy"]
+
+def set_ringer_state(active):
+    """Set the ringer state (start/stop) in shared memory."""
+    try:
+        shm = SharedMemory(name="ringring", create=False)
+        shm.buf[SHARED_MEMORY_SIZE - 2:SHARED_MEMORY_SIZE - 1] = struct.pack("?", active)
+        print(f"Ringer state set to: {'active' if active else 'inactive'}")
+    except FileNotFoundError:
+        raise ValueError("Shared memory not found. Ensure it is created first.")
+    finally:
+        if 'shm' in locals():
+            shm.close()
+
+def get_ringer_state():
+    """Get the current ringer state from shared memory."""
+    try:
+        shm = SharedMemory(name="ringring", create=False)
+        state = struct.unpack("?", bytes(shm.buf[SHARED_MEMORY_SIZE - 2:SHARED_MEMORY_SIZE - 1]))[0]
+        return state
+    except FileNotFoundError:
+        raise ValueError("Shared memory not found. Ensure it is created first.")
+    finally:
+        if 'shm' in locals():
+            shm.close()

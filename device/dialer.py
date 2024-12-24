@@ -8,14 +8,12 @@ from global_state import GlobalState
 CLICKPIN = 35
 STOPPIN = 37
 
-# GPIO setup
-GPIO.setwarnings(False)  # Ignore warning for now
-GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
-GPIO.setup(CLICKPIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(STOPPIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
 def dialer():
     globals = GlobalState()
+
+    # GPIO setup
+    GPIO.setup(CLICKPIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(STOPPIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     clickPressed = False
     stopPressed = False

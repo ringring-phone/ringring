@@ -6,11 +6,10 @@ from global_state import GlobalState, State
 
 PIN = 33
 
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
 def hook():
     globals = GlobalState()
+
+    GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     while True:
         current_state = GPIO.input(PIN)

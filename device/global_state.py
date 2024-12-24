@@ -1,5 +1,6 @@
 import queue
 import logging
+import RPi.GPIO as GPIO
 
 logging.basicConfig(
     level=logging.DEBUG,
