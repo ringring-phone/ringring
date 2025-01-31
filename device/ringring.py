@@ -17,7 +17,7 @@ if __name__ == '__main__':
         threading.Thread(target=dialer, daemon=True),
         threading.Thread(target=hook, daemon=True),
         threading.Thread(target=shared_memory, daemon=True),
-        # threading.Thread(target=sip, daemon=True)
+        threading.Thread(target=sip, daemon=True)
     ]
 
     for thread in threads:

@@ -45,4 +45,5 @@ class State:
     CALL_ACTIVE = "call_active"
     RINGING = "ringing"
     ON_THE_HOOK = "on_the_hook"
+    IN_CALL = "in_call"
     BUSY = "busy"
